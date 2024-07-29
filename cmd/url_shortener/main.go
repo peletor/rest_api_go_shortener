@@ -1,7 +1,11 @@
 package main
 
+import (
+	"rest_api_shortener/internal/config"
+)
+
 func main() {
-	// TODO: init config: cleanenv
+	cfg := config.MustLoad()
 
 	// TODO: init logger: slog
 
