@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 	"rest_api_shortener/internal/config"
+	"rest_api_shortener/internal/http-server/handlers/url/save"
 	"rest_api_shortener/internal/http-server/middleware/mwlogger"
 	"rest_api_shortener/internal/storage/sqlite"
 )
@@ -24,7 +25,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	_ = storage
 	log.Info("Successful opening storage")
 
 	router := chi.NewRouter()
@@ -37,6 +37,7 @@ func main() {
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
 
+	router.Post("/url", save.New(log, storage))
 	// TODO: run server
 }
 
