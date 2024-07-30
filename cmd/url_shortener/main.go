@@ -20,8 +20,8 @@ func main() {
 		log.Error("Error opening storage", slog.Any("Err", err))
 		os.Exit(1)
 	}
-	_ = storage
-	// TODO: init storage: sqlite
+
+	log.Info("Successful opening storage")
 
 	// TODO: init router: chi, "chi render"
 
