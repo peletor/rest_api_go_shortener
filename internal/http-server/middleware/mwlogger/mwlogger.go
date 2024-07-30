@@ -1,4 +1,4 @@
-package logger
+package mwlogger
 
 import (
 	"github.com/go-chi/chi/v5/middleware"
@@ -10,7 +10,7 @@ import (
 func New(log *slog.Logger) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		log = log.With(
-			slog.String("komponent", "middleware/logger"),
+			slog.String("komponent", "middleware/mwlogger"),
 		)
 		log.Info("Logger middleware enabled")
 
