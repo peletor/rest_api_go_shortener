@@ -1,9 +1,12 @@
 package main
 
 import (
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"log/slog"
 	"os"
 	"rest_api_shortener/internal/config"
+	"rest_api_shortener/internal/http-server/middleware/logger"
 	"rest_api_shortener/internal/storage/sqlite"
 )
 
@@ -21,9 +24,18 @@ func main() {
 		os.Exit(1)
 	}
 
+	_ = storage
 	log.Info("Successful opening storage")
 
-	// TODO: init router: chi, "chi render"
+	router := chi.NewRouter()
+
+	// middleware
+	router.Use(middleware.RequestID)
+	router.Use(middleware.RealIP)
+	router.Use(middleware.Logger)
+	router.Use(logger.New(log))
+	router.Use(middleware.Recoverer)
+	router.Use(middleware.URLFormat)
 
 	// TODO: run server
 }
