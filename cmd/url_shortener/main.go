@@ -4,17 +4,19 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"log/slog"
+	"net/http"
 	"os"
 	"rest_api_shortener/internal/config"
 	"rest_api_shortener/internal/http-server/handlers/url/save"
 	"rest_api_shortener/internal/http-server/middleware/mwlogger"
+	"rest_api_shortener/internal/logger/slogger"
 	"rest_api_shortener/internal/storage/sqlite"
 )
 
 func main() {
 	cfg := config.MustLoad()
 
-	log := setupLogger(cfg.Env)
+	log := slogger.SetupLogger(cfg.Env)
 
 	log.Info("Starting url-shortener", slog.String("env", cfg.Env))
 	log.Debug("Debug messages enabled")
@@ -38,36 +40,20 @@ func main() {
 	router.Use(middleware.URLFormat)
 
 	router.Post("/url", save.New(log, storage))
-	// TODO: run server
-}
 
-const (
-	envLocal = "local"
-	envDev   = "dev"
-	envTest  = "test"
-	envProd  = "prod"
-)
+	log.Info("Starting server", slog.String("Address", cfg.Address))
 
-func setupLogger(env string) *slog.Logger {
-	var logger *slog.Logger
-	switch env {
-	case envLocal:
-		logger = slog.New(
-			slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
-		)
-	case envDev:
-		logger = slog.New(
-			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
-		)
-	case envTest:
-		logger = slog.New(
-			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelWarn}),
-		)
-	case envProd:
-		logger = slog.New(
-			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}),
-		)
+	server := &http.Server{
+		Addr:         cfg.Address,
+		Handler:      router,
+		ReadTimeout:  cfg.HTTPServer.Timeout,
+		WriteTimeout: cfg.HTTPServer.Timeout,
+		IdleTimeout:  cfg.HTTPServer.IdleTimeout,
 	}
 
-	return logger
+	if err := server.ListenAndServe(); err != nil {
+		log.Error("Failed to start server", slog.Any("Err", err))
+	}
+
+	log.Error("Server stopped", slog.String("Address", cfg.Address))
 }
