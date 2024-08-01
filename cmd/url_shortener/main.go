@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"rest_api_shortener/internal/config"
+	"rest_api_shortener/internal/http-server/handlers/redirect"
 	"rest_api_shortener/internal/http-server/handlers/url/save"
 	"rest_api_shortener/internal/http-server/middleware/mwlogger"
 	"rest_api_shortener/internal/logger/slogger"
@@ -39,7 +40,8 @@ func main() {
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
 
-	router.Post("/save", save.New(log, storage))
+	router.Post("/url", save.New(log, storage))
+	router.Get("/{alias}", redirect.New(log, storage))
 
 	log.Info("Starting server", slog.String("Address", cfg.Address))
 

@@ -84,6 +84,7 @@ func (s *Storage) GetURL(alias string) (string, error) {
 
 	return resUrl, nil
 }
+
 func (s *Storage) DeleteURL(alias string) error {
 	const op = "storage.sqlite.deleteUrl"
 
