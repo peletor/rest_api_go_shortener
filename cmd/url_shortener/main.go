@@ -39,7 +39,7 @@ func main() {
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
 
-	router.Post("/url", save.New(log, storage))
+	router.Post("/save", save.New(log, storage))
 
 	log.Info("Starting server", slog.String("Address", cfg.Address))
 
