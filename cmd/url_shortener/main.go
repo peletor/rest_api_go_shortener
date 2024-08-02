@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"os"
 	"rest_api_shortener/internal/config"
-	"rest_api_shortener/internal/http-server/handlers/redirect"
 	deleteURL "rest_api_shortener/internal/http-server/handlers/url/delete"
-	"rest_api_shortener/internal/http-server/handlers/url/save"
+	redirectURL "rest_api_shortener/internal/http-server/handlers/url/redirect"
+	saveURL "rest_api_shortener/internal/http-server/handlers/url/save"
 	"rest_api_shortener/internal/http-server/middleware/mwlogger"
 	"rest_api_shortener/internal/logger/slogger"
 	"rest_api_shortener/internal/storage/sqlite"
@@ -36,14 +36,21 @@ func main() {
 	// middleware
 	router.Use(middleware.RequestID)
 	router.Use(middleware.RealIP)
-	router.Use(middleware.Logger)
+	//router.Use(middleware.Logger)
 	router.Use(mwlogger.New(log))
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
 
-	router.Post("/url", save.New(log, storage))
-	router.Get("/{alias}", redirect.New(log, storage))
-	router.Delete("/url/{alias}", deleteURL.New(log, storage))
+	router.Route("/url", func(r chi.Router) {
+		r.Use(middleware.BasicAuth("url-shortener",
+			map[string]string{
+				cfg.HTTPServer.Username: cfg.HTTPServer.Password,
+			}))
+		r.Post("/", saveURL.New(log, storage))
+		r.Delete("/{alias}", deleteURL.New(log, storage))
+	})
+
+	router.Get("/{alias}", redirectURL.New(log, storage))
 
 	log.Info("Starting server", slog.String("Address", cfg.Address))
 
