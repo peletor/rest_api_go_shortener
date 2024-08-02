@@ -7,7 +7,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"log/slog"
 	"net/http"
-	resp "rest_api_shortener/internal/lib/api/responce"
+	resp "rest_api_shortener/internal/lib/api/response"
 	"rest_api_shortener/internal/lib/random"
 	"rest_api_shortener/internal/storage"
 )

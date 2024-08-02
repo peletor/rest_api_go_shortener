@@ -8,6 +8,7 @@ import (
 	"os"
 	"rest_api_shortener/internal/config"
 	"rest_api_shortener/internal/http-server/handlers/redirect"
+	deleteURL "rest_api_shortener/internal/http-server/handlers/url/delete"
 	"rest_api_shortener/internal/http-server/handlers/url/save"
 	"rest_api_shortener/internal/http-server/middleware/mwlogger"
 	"rest_api_shortener/internal/logger/slogger"
@@ -42,6 +43,7 @@ func main() {
 
 	router.Post("/url", save.New(log, storage))
 	router.Get("/{alias}", redirect.New(log, storage))
+	router.Delete("/url/{alias}", deleteURL.New(log, storage))
 
 	log.Info("Starting server", slog.String("Address", cfg.Address))
 
