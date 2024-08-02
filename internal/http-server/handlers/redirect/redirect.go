@@ -7,11 +7,13 @@ import (
 	"github.com/go-chi/render"
 	"log/slog"
 	"net/http"
-	resp "rest_api_shortener/internal/lib/api/responce"
+	resp "rest_api_shortener/internal/lib/api/response"
 	"rest_api_shortener/internal/storage"
 )
 
 // URLGetter is an interface for getting url by alias.
+//
+//go:generate go run github.com/vektra/mockery/v2@v2.43.2 --name=URLGetter
 type URLGetter interface {
 	GetURL(alias string) (string, error)
 }
@@ -53,6 +55,6 @@ func New(log *slog.Logger, urlGetter URLGetter) http.HandlerFunc {
 
 		log.Info("Got URL", "alias", alias, "url", url)
 
-		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+		http.Redirect(w, r, url, http.StatusFound)
 	}
 }
