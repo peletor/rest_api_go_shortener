@@ -1,2 +1,7 @@
-# rest_api_go_shortener
-REST API Go URL Shotener
+# REST API server
+
+### REST API Go URL Shortener
+
+This is portfolio pet GO project
+writen by "peletor"
+
