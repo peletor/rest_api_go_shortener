@@ -94,9 +94,13 @@ func (s *Storage) DeleteURL(alias string) error {
 		return errors.New(op + ": Failed to prepare statement: " + err.Error())
 	}
 
-	_, err = stmt.Exec(alias)
+	res, err := stmt.Exec(alias)
 	if err != nil {
 		return errors.New(op + ": Failed to delete: " + err.Error())
+	}
+
+	if rows, _ := res.RowsAffected(); rows == 0 {
+		return storage.ErrURLNotFound
 	}
 
 	return nil

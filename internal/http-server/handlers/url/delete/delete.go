@@ -1,12 +1,14 @@
 package delete
 
 import (
+	"errors"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 	"log/slog"
 	"net/http"
 	resp "rest_api_shortener/internal/lib/api/response"
+	"rest_api_shortener/internal/storage"
 )
 
 //go:generate go run github.com/vektra/mockery/v2@v2.43.2 --name=URLDeleter
@@ -34,14 +36,22 @@ func New(log *slog.Logger, urlDeleter URLDeleter) http.HandlerFunc {
 
 		err := urlDeleter.DeleteURL(alias)
 		if err != nil {
-			log.Info("Failed to delete URL", "alias", alias, "err", err)
+			if errors.Is(err, storage.ErrURLNotFound) {
+				log.Info("URL alias not found", "alias", alias)
 
-			render.JSON(w, r, resp.Error("Failed to delete URL"))
+				render.JSON(w, r, resp.Error("URL alias not found"))
+
+				return
+			}
+
+			log.Info("Failed to delete URL alias", "alias", alias, "err", err)
+
+			render.JSON(w, r, resp.Error("Failed to delete URL alias"))
 
 			return
 		}
 
-		log.Info("URL deleted", "alias", alias)
+		log.Info("URL alias deleted", "alias", alias)
 
 		render.JSON(w, r, resp.OK())
 	}
