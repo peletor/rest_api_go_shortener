@@ -70,9 +70,9 @@ func New(log *slog.Logger, urlSaver URLSaver) http.HandlerFunc {
 		id, err := urlSaver.SaveURL(req.URL, alias)
 		if err != nil {
 			if errors.Is(err, storage.ErrURLExists) {
-				log.Info("URL already exists", slog.String("url", req.URL))
+				log.Info("URL alias already exists", slog.String("alias", alias))
 
-				render.JSON(w, r, resp.Error("URL already exists"))
+				render.JSON(w, r, resp.Error("URL alias already exists"))
 
 				return
 			}
@@ -86,14 +86,15 @@ func New(log *slog.Logger, urlSaver URLSaver) http.HandlerFunc {
 
 		log.Info("URL saved",
 			slog.String("url", req.URL),
+			slog.String("alias", alias),
 			slog.Int64("id", id),
 		)
 
-		responceOK(w, r, alias)
+		responseOK(w, r, alias)
 	}
 }
 
-func responceOK(w http.ResponseWriter, r *http.Request, alias string) {
+func responseOK(w http.ResponseWriter, r *http.Request, alias string) {
 	render.JSON(w, r, Response{
 		Response: resp.OK(),
 		Alias:    alias,

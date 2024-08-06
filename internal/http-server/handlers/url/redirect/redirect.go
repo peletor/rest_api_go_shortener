@@ -39,9 +39,9 @@ func New(log *slog.Logger, urlGetter URLGetter) http.HandlerFunc {
 		url, err := urlGetter.GetURL(alias)
 		if err != nil {
 			if errors.Is(err, storage.ErrURLNotFound) {
-				log.Info("URL not found", "alias", alias)
+				log.Info("URL alias not found", "alias", alias)
 
-				render.JSON(w, r, resp.Error("URL not found"))
+				render.JSON(w, r, resp.Error("URL alias not found"))
 
 				return
 			}
