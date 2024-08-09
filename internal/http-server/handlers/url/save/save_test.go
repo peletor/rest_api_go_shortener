@@ -11,6 +11,7 @@ import (
 	"net/http/httptest"
 	"rest_api_shortener/internal/http-server/handlers/url/save/mocks"
 	"rest_api_shortener/internal/logger/handlers/slogdiscard"
+	"rest_api_shortener/internal/storage"
 	"testing"
 )
 
@@ -50,6 +51,25 @@ func TestSaveHandler(t *testing.T) {
 			url:       "https://google.com/",
 			respError: "Failed to save URL",
 			mockError: errors.New("unexpected error"),
+		},
+		{
+			name:      "Alias exist",
+			alias:     "test_alias",
+			url:       "https://google.com/",
+			respError: "URL alias already exists",
+			mockError: storage.ErrURLExists,
+		},
+		{
+			name:      "Invalid alias JSON",
+			alias:     "test_alias\"",
+			url:       "https://google.com/",
+			respError: "Filed to decode request",
+		},
+		{
+			name:      "Invalid url JSON",
+			alias:     "test_alias",
+			url:       "https://google.com/\n",
+			respError: "Filed to decode request",
 		},
 	}
 
