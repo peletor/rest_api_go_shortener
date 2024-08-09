@@ -47,7 +47,7 @@ func main() {
 				cfg.HTTPServer.Username: cfg.HTTPServer.Password,
 			}))
 		r.Post("/", saveURL.New(log, storage))
-		r.Delete("/{alias}", deleteURL.New(log, storage))
+		r.Delete("/", deleteURL.New(log, storage))
 	})
 
 	router.Get("/{alias}", redirectURL.New(log, storage))

@@ -2,7 +2,6 @@ package delete
 
 import (
 	"errors"
-	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 	"log/slog"
@@ -10,6 +9,10 @@ import (
 	resp "rest_api_shortener/internal/lib/api/response"
 	"rest_api_shortener/internal/storage"
 )
+
+type Request struct {
+	Alias string `json:"alias,omitempty"`
+}
 
 //go:generate go run github.com/vektra/mockery/v2@v2.43.2 --name=URLDeleter
 type URLDeleter interface {
@@ -25,7 +28,21 @@ func New(log *slog.Logger, urlDeleter URLDeleter) http.HandlerFunc {
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
-		alias := chi.URLParam(r, "alias")
+		var req Request
+
+		err := render.DecodeJSON(r.Body, &req)
+		if err != nil {
+			log.Error("Filed to decode request body", slog.Any("error", err))
+
+			render.JSON(w, r, resp.Error("Filed to decode request"))
+
+			return
+		}
+
+		log.Info("Request body decoded", slog.Any("request", req))
+
+		alias := req.Alias
+
 		if alias == "" {
 			log.Info("Alias is empty")
 
@@ -34,7 +51,7 @@ func New(log *slog.Logger, urlDeleter URLDeleter) http.HandlerFunc {
 			return
 		}
 
-		err := urlDeleter.DeleteURL(alias)
+		err = urlDeleter.DeleteURL(alias)
 		if err != nil {
 			if errors.Is(err, storage.ErrURLNotFound) {
 				log.Info("URL alias not found", "alias", alias)

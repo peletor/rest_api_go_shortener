@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/url"
-	"path"
+	"rest_api_shortener/internal/http-server/handlers/url/delete"
 	"rest_api_shortener/internal/http-server/handlers/url/save"
 	"rest_api_shortener/internal/lib/api"
 	"rest_api_shortener/internal/lib/random"
@@ -78,7 +78,7 @@ func TestURLShortener_SaveRedirect(t *testing.T) {
 
 			// Save
 
-			resp := e.POST("/url").
+			reqSave := e.POST("/url").
 				WithJSON(save.Request{
 					URL:   tc.url,
 					Alias: tc.alias,
@@ -88,9 +88,9 @@ func TestURLShortener_SaveRedirect(t *testing.T) {
 				JSON().Object()
 
 			if tc.error != "" {
-				resp.NotContainsKey("alias")
+				reqSave.NotContainsKey("alias")
 
-				resp.Value("error").String().IsEqual(tc.error)
+				reqSave.Value("error").String().IsEqual(tc.error)
 
 				return
 			}
@@ -98,11 +98,11 @@ func TestURLShortener_SaveRedirect(t *testing.T) {
 			alias := tc.alias
 
 			if tc.alias != "" {
-				resp.Value("alias").String().IsEqual(tc.alias)
+				reqSave.Value("alias").String().IsEqual(tc.alias)
 			} else {
-				resp.Value("alias").String().NotEmpty()
+				reqSave.Value("alias").String().NotEmpty()
 
-				alias = resp.Value("alias").String().Raw()
+				alias = reqSave.Value("alias").String().Raw()
 			}
 
 			// Redirect
@@ -111,7 +111,10 @@ func TestURLShortener_SaveRedirect(t *testing.T) {
 
 			// Remove
 
-			reqDel := e.DELETE("/"+path.Join("url", alias)).
+			reqDel := e.DELETE("/url").
+				WithJSON(delete.Request{
+					Alias: alias,
+				}).
 				WithBasicAuth("admin_local", "pass_local").
 				Expect().Status(http.StatusOK).
 				JSON().Object()
