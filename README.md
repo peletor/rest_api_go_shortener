@@ -2,6 +2,10 @@
 
 ### REST API Go URL Shortener
 
-This is portfolio pet GO project
-writen by "peletor"
+This is the portfolio project of GO, created by "peletor".
 
+## REST API
+It provides the following endpoints:
+- GET /{alias} - redirects to alias long URL
+- POST /url - saves the URL alias
+- DELETE /url - deletes the URL alias
